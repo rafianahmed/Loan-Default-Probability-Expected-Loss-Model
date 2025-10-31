@@ -1,84 +1,80 @@
-⚙️ Methodology
+# 🏦 Loan Default Probability & Expected Loss Model
 
-Data Preparation
+## 📘 Overview
+This project implements a **Logistic Regression model** to estimate the **Probability of Default (PD)** for borrowers using financial ratios such as **Debt-to-Income**, **Payment-to-Income**, **FICO score**, and **Credit Lines Outstanding**. Using a **10% recovery rate**, the model can calculate **Expected Loss (EL)**:
 
-Read borrower data from loan_data_created.csv
+\[
+EL = PD \times (1 - \text{Recovery Rate})
+\]
 
-Engineered key credit risk features:
+---
 
-payment_to_income = loan_amt_outstanding / income
+## ⚙️ Methodology
+1. **Data Preparation**
+   - Load borrower data from `loan_data_created.csv`
+   - Compute key ratios:
+     - `payment_to_income = loan_amt_outstanding / income`
+     - `debt_to_income = total_debt_outstanding / income`
 
-debt_to_income = total_debt_outstanding / income
+2. **Feature Selection**
+   - Features used: `credit_lines_outstanding`, `debt_to_income`, `payment_to_income`, `years_employed`, `fico_score`
 
-Model Training
+3. **Model Training**
+   - Train **Logistic Regression** using scikit-learn
 
-Trained a Logistic Regression model using features:
+4. **Evaluation**
+   - Predict default outcomes
+   - Measure **error rate** and **ROC-AUC score**
 
-credit_lines_outstanding
+---
 
-debt_to_income
+## 💻 Example Code
 
-payment_to_income
-
-years_employed
-
-fico_score
-
-Model Evaluation
-
-Evaluated model accuracy using ROC Curve and AUC score
-
-Computed model error rate and discriminative power
-
-Expected Loss Calculation
-
-Expected Loss (EL)
-=
-PD
-×
-(
-1
-−
-Recovery Rate
-)
-Expected Loss (EL)=PD×(1−Recovery Rate)
-
-With a 10% recovery rate, the model outputs expected loss per borrower.
-
-🧠 Example Usage
+```python
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 import pandas as pd
 
-# Read and prepare data
+# Load dataset
 df = pd.read_csv('loan_data_created.csv')
+
+# Feature engineering
 df['payment_to_income'] = df['loan_amt_outstanding'] / df['income']
 df['debt_to_income'] = df['total_debt_outstanding'] / df['income']
 
 # Define model features
 features = ['credit_lines_outstanding', 'debt_to_income', 'payment_to_income', 'years_employed', 'fico_score']
 
-# Train logistic regression
-clf = LogisticRegression(random_state=0, solver='liblinear', tol=1e-5, max_iter=10000).fit(df[features], df['default'])
+# Train Logistic Regression
+clf = LogisticRegression(random_state=0, solver='liblinear', tol=1e-5, max_iter=10000)
+clf.fit(df[features], df['default'])
 
-# Evaluate
+# Print model coefficients
+print("Coefficients:", clf.coef_)
+print("Intercept:", clf.intercept_)
+
+# Predict on dataset
 y_pred = clf.predict(df[features])
+
+# Evaluate model
 fpr, tpr, thresholds = metrics.roc_curve(df['default'], y_pred)
-print("Model Error:", (abs(df['default'] - y_pred).sum()) / len(df))
-print("AUC Score:", metrics.auc(fpr, tpr))
+error_rate = (abs(df['default'] - y_pred).sum()) / len(df)
+auc_score = metrics.auc(fpr, tpr)
 
-🧰 Tech Stack
+print("Error Rate:", error_rate)
+print("AUC Score:", auc_score)
+Tech Stack
 
-Language: Python
+Python
 
-Libraries: scikit-learn, pandas, numpy
+scikit-learn
 
-Techniques: Logistic Regression, ROC-AUC, Credit Risk Modeling
+pandas, numpy
 
 📊 Outcome
 
-Successfully modeled borrower default probability using key financial ratios.
+Estimates Probability of Default (PD) for borrowers
 
-Provided a quantifiable metric for expected loan loss based on PD and recovery rate.
+Enables Expected Loss (EL) calculation using a 10% recovery rate
 
-Can serve as the foundation for credit scoring systems or risk management dashboards.
+Model performance evaluated via ROC-AUC and error rate
